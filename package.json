@@ -1,0 +1,22 @@
+{
+  "name": "distribution-networks-api",
+  "version": "1.0.0",
+  "description": "REST API для моніторингу розподільних мереж 10 кВ",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "rest-api",
+    "express",
+    "power-grid",
+    "nodejs"
+  ],
+  "author": "Студент",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.22.1"
+  },
+  "type": "commonjs"
+}

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Моніторинг мереж 10 кВ</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #4a4e69; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .api-button { width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
+        .btn-get { background-color: #2ecc71; }
+        .btn-post { background-color: #3498db; }
+        .btn-delete { background-color: #e74c3c; } 
+        .api-button:hover { opacity: 0.8; }
+        .box-title { margin-top: 20px; font-weight: bold; font-size: 14px; color: #666; }
+        pre { background: #1e1e1e; color: #dcdcdc; padding: 15px; border-radius: 8px; overflow-x: auto; max-height: 250px; font-size: 13px; }
+        .status-badge { display: inline-block; padding: 4px 8px; background: #2ecc71; color: white; border-radius: 4px; font-size: 12px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📡 Моніторинг мереж 10 кВ</h1>
+    
+    <div class="box-title">🕹️ Тестування API</div>
+    
+    <button class="api-button btn-get" onclick="fetchData()">
+        <span>GET /api/distribution-networks</span>
+        <small>Отримати всі</small>
+    </button>
+    
+    <button class="api-button btn-get" onclick="fetchOne(1)">
+        <span>GET /api/distribution-networks/1</span>
+        <small>За ID</small>
+    </button>
+
+    <button class="api-button btn-post" onclick="createMock()">
+        <span>POST /api/distribution-networks</span>
+        <small>Створити</small>
+    </button>
+        <button class="api-button btn-get" style="background-color: #f39c12;" onclick="fetchLosses(1)">
+        <span>GET /api/.../1/losses</span>
+        <small>Аналіз втрат</small>
+    </button>
+
+    <button class="api-button btn-get" style="background-color: #9b59b6;" onclick="fetchSubstations(1)">
+       <span>GET /api/.../1/substations</span>
+        <small>Список ТП</small>
+    </button>
+
+    <div class="box-title">📊 Поточні дані (База даних)</div>
+    <pre id="current-data">Натисніть GET, щоб завантажити дані...</pre>
+
+    <div class="box-title">🖥️ Відповідь сервера</div>
+    <div id="status-container"></div>
+    <pre id="server-response">Тут з'явиться результат останнього запиту...</pre>
+</div>
+
+<script>
+    const API_URL = '/api/distribution-networks';
+
+    //Функція для відображення відповіді
+    function showResponse(data, status = 200) {
+        document.getElementById('server-response').innerText = JSON.stringify(data, null, 2);
+        document.getElementById('status-container').innerHTML = `<span class="status-badge">Status: ${status}</span>`;
+    }
+
+    //GET запит
+    async function fetchData() {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        document.getElementById('current-data').innerText = JSON.stringify(data, null, 2);
+        showResponse(data, res.status);
+    }
+
+    //GET за ID
+    async function fetchOne(id) {
+        const res = await fetch(`${API_URL}/${id}`);
+        const data = await res.json();
+        showResponse(data, res.status);
+    }
+
+    //POST (тестовий)
+    async function createMock() {
+        const res = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: "Новий Фідер Тест", voltage: 10, activePower: 100 })
+        });
+        const data = await res.json();
+        showResponse(data, res.status);
+        fetchData(); // Оновити список
+    }
+</script>
+
+</body>
+</html>
