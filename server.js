@@ -3,6 +3,35 @@ const app = express();
 app.use(express.static('public'));
 const PORT = 3001;
 
+const cors = require('cors');
+
+//Налаштування CORS (дозволяє запити з інших доменів)
+app.use(cors());
+
+//Обмеження розміру запитів (наприклад, не більше 100 кілобайт)
+app.use(express.json({ limit: '100kb' }));
+
+//Статистика викликів API
+let apiStats = {
+    totalRequests: 0,
+    methods: { GET: 0, POST: 0, PUT: 0, PATCH: 0, DELETE: 0 }
+};
+
+//Middleware для логування та збору статистики
+app.use((req, res, next) => {
+    apiStats.totalRequests++;
+    if (apiStats.methods[req.method] !== undefined) {
+        apiStats.methods[req.method]++;
+    }
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next(); // Передаємо управління далі
+});
+
+//Ендпоінт для перегляду статистики
+app.get('/api/stats', (req, res) => {
+    res.status(200).json(apiStats);
+});
+
 //Middleware для парсингу JSON у тілі запитів
 app.use(express.json());
 
@@ -98,6 +127,24 @@ app.post('/api/distribution-networks', (req, res) => {
 
     distributionNetworks.push(newNetwork);
     res.status(201).json({ message: "Мережу створено", data: newNetwork });
+});
+
+//PATCH /api/distribution-networks/:id (Часткове оновлення)
+app.patch('/api/distribution-networks/:id', (req, res) => {
+    const network = distributionNetworks.find(n => n.id === parseInt(req.params.id));
+    if (!network) return res.status(404).json({ error: "Мережу не знайдено." });
+
+    Object.assign(network, req.body); // Оновлюємо тільки передані поля
+    res.status(200).json({ message: "Дані частково оновлено", data: network });
+});
+
+//DELETE /api/distribution-networks/:id (Видалити мережу)
+app.delete('/api/distribution-networks/:id', (req, res) => {
+    const index = distributionNetworks.findIndex(n => n.id === parseInt(req.params.id));
+    if (index === -1) return res.status(404).json({ error: "Мережу не знайдено." });
+
+    const deleted = distributionNetworks.splice(index, 1);
+    res.status(200).json({ message: "Мережу видалено", data: deleted[0] });
 });
 
 //PUT /api/distribution-networks/:id (Оновити існуючу мережу)
